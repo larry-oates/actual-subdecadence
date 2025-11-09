@@ -14,7 +14,7 @@ const Subdecadence = () => {
   const [currentScore, setCurrentScore] = useState(0);
   const [scoreBreakdown, setScoreBreakdown] = useState(null);
   const [aeonTotal, setAeonTotal] = useState(0);
-  const [gameHistory, setGameHistory] = useState([]);
+  const [aeonScores, setAeonScores] = useState([]);
   const [summonedLemur, setSummonedLemur] = useState(null);
   const [gameState, setGameState] = useState("idle");
   const [message, setMessage] = useState("");
@@ -111,8 +111,9 @@ const Subdecadence = () => {
     setCurrentScore(0);
     setScoreBreakdown(null);
     setAeonTotal(0);
-    setGameState("idle");
+    setAeonScores([]);
     setSummonedLemur(null);
+    setGameState("idle");
     setMessage("Draw cards to begin the aeon");
   };
 
@@ -359,6 +360,7 @@ const Subdecadence = () => {
     });
     setCurrentScore(score);
     setAeonTotal(aeonTotal + score);
+    setAeonScores((prevScores) => [...prevScores, score]);
 
     const finalScore = aeonTotal + score;
     const lemurMesh = Math.abs(finalScore);
@@ -367,10 +369,6 @@ const Subdecadence = () => {
     // Set game state and message
     if (score < 0 || deck.length < 10) {
       setSummonedLemur(lemur);
-      setGameHistory((prevHistory) => [
-        ...prevHistory,
-        { finalScore, lemurMesh },
-      ]);
       setGameState("ended");
       setMessage(
         score < 0
@@ -494,7 +492,7 @@ const Subdecadence = () => {
               <span>{card.suit}</span>
             </div>
 
-            {position && !isStacked && (
+            {position && (
               <div className="absolute -top-6 text-xs font-semibold text-gray-600 whitespace-nowrap">
                 {position}
               </div>
@@ -556,7 +554,7 @@ const Subdecadence = () => {
             isBottom={true}
           />
           {pairedSetCard && (
-            <div className="absolute top-5 left-5" style={{ zIndex: 2 }}>
+            <div className="absolute top-1 left-5" style={{ zIndex: 2 }}>
               <Card
                 card={pairedSetCard}
                 isPaired={true}
@@ -574,7 +572,7 @@ const Subdecadence = () => {
   const hasDrawnCards = crossCards.length > 0;
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white">
+    <div className="min-h-screen w-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white">
       {draggedCard && isDragging && (
         <div
           className="pointer-events-none fixed"
@@ -616,20 +614,19 @@ const Subdecadence = () => {
               <h3 className="text-lg font-semibold text-yellow-300 mb-2">Mesh-{summonedLemur.mesh}: {summonedLemur.name}</h3>
               <p className="text-gray-300">{summonedLemur.details}</p>
 
-              {gameHistory.length > 0 && (
-                <div className="mt-4 border-t border-gray-700 pt-4">
-                  <h3 className="text-lg font-semibold text-yellow-300 mb-2">Game History</h3>
-                  <ul className="space-y-1 text-sm text-gray-400">
-                    {gameHistory.map((game, index) => (
-                      <li key={index} className="flex justify-between">
-                        <span>Game {index + 1}:</span>
-                        <span>Score {game.finalScore}, Lemur Mesh-{game.lemurMesh}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
+              <div className="mt-4 border-t border-gray-700 pt-4">
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">Aeon Scores</h3>
+                <ul className="space-y-1 text-sm text-gray-400">
+                  {aeonScores.map((roundScore, index) => (
+                    <li key={index} className="flex justify-between">
+                      <span>Round {index + 1}:</span>
+                      <span className={roundScore >= 0 ? "text-green-400" : "text-red-400"}>
+                        {roundScore >= 0 ? "+" : ""}{roundScore}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
           {gameState !== "ended" && scoreBreakdown && (
@@ -788,15 +785,15 @@ const Subdecadence = () => {
             </header>
 
             {/* Cards area — make this the only scrollable portion */}
-            <div className="flex-1 overflow-auto mt-2">
+            <div className="flex-1 mt-2">
               {hasDrawnCards && (
-                <div className="flex gap-2 justify-center w-full">
+                <div className="flex gap-2 justify-center w-full h-full">
                   {/* Matching Set */}
                   <div className="w-1/3">
-                    <h2 className="text-xl font-semibold mb-2 text-center">
-                      Matching Set
-                    </h2>
-                    <div className="flex flex-col gap-2 items-center">
+                      <h2 className="text-xl font-semibold mb-2 text-center">
+                        Matching Set
+                      </h2>
+                    <div className="flex flex-col gap-2 items-center justify-center min-h-[1px]">
                       {setCards.map(
                         (card, index) =>
                           !isPaired(card.id) && (
@@ -832,7 +829,7 @@ const Subdecadence = () => {
                     <h2 className="text-xl font-semibold text-center">
                       Atlantean Cross
                     </h2>
-                    <div className="flex-1 flex justify-center items-center">
+                    <div className="flex-1 flex justify-center pt-6">
                       <div className="relative flex justify-center items-center min-w-[320px] min-h-[500px] overflow-visible">
                         <CrossCardWithPair card={crossCards[0]} position="Deep Past" positionStyle={{ top: "280px", left: "50%", transform: "translate(-50%, 0)" }} />
                         <CrossCardWithPair card={crossCards[1]} position="Creative" positionStyle={{ top: "140px", right: "20%", transform: "translate(50%, 0)" }} />
@@ -903,3 +900,4 @@ const Subdecadence = () => {
 };
 
 export default Subdecadence;
+

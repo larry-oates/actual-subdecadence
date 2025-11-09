@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Shuffle, Play, RotateCcw, Eye } from "lucide-react";
 
 const Subdecadence = () => {
+  const [gameMode, setGameMode] = useState("subdecadence");
   const [deck, setDeck] = useState([]);
   const [crossCards, setCrossCards] = useState([]);
   const [setCards, setSetCards] = useState([]);
@@ -74,10 +75,12 @@ const Subdecadence = () => {
   const initializeDeck = () => {
     const newDeck = [];
     suits.forEach((suit) => {
-      for (let i = 0; i <= 9; i++) {
-        if (i === 0) {
+      const startValue = gameMode === "decadence" ? 1 : 0;
+      for (let i = startValue; i <= 9; i++) {
+        if (i === 0 && gameMode === "subdecadence") {
           newDeck.push({ suit, value: 0, display: "Q", id: `${suit}-0` });
-        } else {
+        }
+        if (i > 0) {
           newDeck.push({
             suit,
             value: i,
@@ -152,7 +155,8 @@ const Subdecadence = () => {
 
   const canPair = (card1, card2) => {
     if (card1.value === "K" || card2.value === "K") return false;
-    return card1.value + card2.value === 9;
+    const target = gameMode === "decadence" ? 10 : 9;
+    return card1.value + card2.value === target;
   };
 
   const selectMatchCard = (card) => {
@@ -386,6 +390,10 @@ const Subdecadence = () => {
 
   useEffect(() => {
     startNewGame();
+  }, [gameMode]);
+
+  useEffect(() => {
+    startNewGame();
   }, []);
 
   const Card = ({
@@ -611,17 +619,26 @@ const Subdecadence = () => {
               <h2 className="text-2xl font-bold text-yellow-400 mb-2 text-center">
                 Lemur Summoned
               </h2>
-              <h3 className="text-lg font-semibold text-yellow-300 mb-2">Mesh-{summonedLemur.mesh}: {summonedLemur.name}</h3>
+              <h3 className="text-lg font-semibold text-yellow-300 mb-2">
+                Mesh-{summonedLemur.mesh}: {summonedLemur.name}
+              </h3>
               <p className="text-gray-300">{summonedLemur.details}</p>
 
               <div className="mt-4 border-t border-gray-700 pt-4">
-                <h3 className="text-lg font-semibold text-yellow-300 mb-2">Aeon Scores</h3>
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">
+                  Aeon Scores
+                </h3>
                 <ul className="space-y-1 text-sm text-gray-400">
                   {aeonScores.map((roundScore, index) => (
                     <li key={index} className="flex justify-between">
                       <span>Round {index + 1}:</span>
-                      <span className={roundScore >= 0 ? "text-green-400" : "text-red-400"}>
-                        {roundScore >= 0 ? "+" : ""}{roundScore}
+                      <span
+                        className={
+                          roundScore >= 0 ? "text-green-400" : "text-red-400"
+                        }
+                      >
+                        {roundScore >= 0 ? "+" : ""}
+                        {roundScore}
                       </span>
                     </li>
                   ))}
@@ -724,7 +741,7 @@ const Subdecadence = () => {
                         : "text-red-400"
                     }
                   >
-                    {scoreBreakdown.total >= -1 ? "+" : ""}
+                    {scoreBreakdown.total > 0 ? "+" : ""}
                     {scoreBreakdown.total}
                   </span>
                 </div>
@@ -735,10 +752,12 @@ const Subdecadence = () => {
         {/* Center column: title + cards */}
         <main className="flex-1 flex flex-col items-center px-4 py-1">
           <div className="w-full max-w-4xl flex flex-col flex-1">
-            <header className="shrink-0">
-              <h1 className="text-4xl font-bold text-center mb-2">Subdecadence</h1>
+            <header className="shrink-0 text-center">
+              <h1 className="text-4xl font-bold mb-2 capitalize">{gameMode}</h1>
               <p className="text-center text-gray-300 mb-2">
-                UNO™ is the perfect time Time Sorcery tool...
+                {gameMode === "decadence"
+                  ? "UNO™ is the perfect time Time Sorcery tool..."
+                  : "the ultimate blasphemy"}
               </p>
 
               <div className="bg-black bg-opacity-50 rounded-lg p-2">
@@ -790,9 +809,9 @@ const Subdecadence = () => {
                 <div className="flex gap-2 justify-center w-full h-full">
                   {/* Matching Set */}
                   <div className="w-1/3">
-                      <h2 className="text-xl font-semibold mb-2 text-center">
-                        Matching Set
-                      </h2>
+                    <h2 className="text-xl font-semibold mb-2 text-center">
+                      Matching Set
+                    </h2>
                     <div className="flex flex-col gap-2 items-center justify-center min-h-[1px]">
                       {setCards.map(
                         (card, index) =>
@@ -831,11 +850,51 @@ const Subdecadence = () => {
                     </h2>
                     <div className="flex-1 flex justify-center pt-6">
                       <div className="relative flex justify-center items-center min-w-[320px] min-h-[500px] overflow-visible">
-                        <CrossCardWithPair card={crossCards[0]} position="Deep Past" positionStyle={{ top: "280px", left: "50%", transform: "translate(-50%, 0)" }} />
-                        <CrossCardWithPair card={crossCards[1]} position="Creative" positionStyle={{ top: "140px", right: "20%", transform: "translate(50%, 0)" }} />
-                        <CrossCardWithPair card={crossCards[2]} position="Destructive" positionStyle={{ top: "140px", left: "20%", transform: "translate(-50%, 0)" }} />
-                        <CrossCardWithPair card={crossCards[3]} position="Far Future" positionStyle={{ top: "0", left: "50%", transform: "translateX(-50%)" }} />
-                        <CrossCardWithPair card={crossCards[4]} position="Dreams" positionStyle={{ top: "420px", left: "50%", transform: "translateX(-50%)" }} />
+                        <CrossCardWithPair
+                          card={crossCards[0]}
+                          position="Deep Past"
+                          positionStyle={{
+                            top: "280px",
+                            left: "50%",
+                            transform: "translate(-50%, 0)",
+                          }}
+                        />
+                        <CrossCardWithPair
+                          card={crossCards[1]}
+                          position="Creative"
+                          positionStyle={{
+                            top: "140px",
+                            right: "20%",
+                            transform: "translate(50%, 0)",
+                          }}
+                        />
+                        <CrossCardWithPair
+                          card={crossCards[2]}
+                          position="Destructive"
+                          positionStyle={{
+                            top: "140px",
+                            left: "20%",
+                            transform: "translate(-50%, 0)",
+                          }}
+                        />
+                        <CrossCardWithPair
+                          card={crossCards[3]}
+                          position="Far Future"
+                          positionStyle={{
+                            top: "0",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                          }}
+                        />
+                        <CrossCardWithPair
+                          card={crossCards[4]}
+                          position="Dreams"
+                          positionStyle={{
+                            top: "420px",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -848,13 +907,28 @@ const Subdecadence = () => {
         {/* Right column: Controls */}
         <aside
           className={`w-full md:w-56 bg-transparent p-4 flex-shrink-0 h-screen transition-opacity duration-1000 ${
-            gameState === "ended"
-              ? "z-60 opacity-100"
-              : "opacity-100"
+            gameState === "ended" ? "z-60 opacity-100" : "opacity-100"
           }`}
         >
           <div className="h-full flex flex-col justify-center">
             <div className="flex flex-col gap-4">
+              <div>
+                <label
+                  htmlFor="gameMode"
+                  className="block text-sm font-medium text-gray-400 mb-1"
+                >
+                  Game Mode
+                </label>
+                <select
+                  id="gameMode"
+                  value={gameMode}
+                  onChange={(e) => setGameMode(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-600 text-white px-3 py-2 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                >
+                  <option value="subdecadence">Subdecadence</option>
+                  <option value="decadence">Decadence</option>
+                </select>
+              </div>
               <button
                 onClick={startNewGame}
                 className="w-full flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded-lg font-semibold transition-colors"
@@ -900,4 +974,3 @@ const Subdecadence = () => {
 };
 
 export default Subdecadence;
-

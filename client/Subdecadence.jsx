@@ -14,12 +14,62 @@ const Subdecadence = () => {
   const [currentScore, setCurrentScore] = useState(0);
   const [scoreBreakdown, setScoreBreakdown] = useState(null);
   const [aeonTotal, setAeonTotal] = useState(0);
+  const [gameHistory, setGameHistory] = useState([]);
+  const [summonedLemur, setSummonedLemur] = useState(null);
   const [gameState, setGameState] = useState("idle");
   const [message, setMessage] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const suits = ["♥", "♦", "♣", "♠"];
+
+  const lemurs = [
+    { mesh: 0, name: "Lurgo (Legba)", details: "(Terminal) Initiator. (Clicks Gt-00). Pitch Ana-1. Net-Span 1::0. Amphidemon of Openings. (The Door of Doors). Cipher Gt-01, Gt-10. 1st Door (The Pod) [Mercury], Dorsal. 1st Phase-limit. Decadology. C/tp-#7, Mj+ [7C]. Rt-1:[1890] Spinal-voyage (fate line), programming." },
+    { mesh: 1, name: "Duoddod", details: "Duplicitous Redoubler. (Clicks Gt-01). Pitch Ana-2. Net-Span 2::0. Amphidemon of Abstract Addiction 2nd Door (The Crypt) [Venus], Cervical. Decadology. C/tp-#8, Mj+ [8C]. Rt-1:[271890] Pineal-regression (rear vision). Rt-2:[27541890] Datacomb searches, digital exactitude (every second counts). [+1 sub-Rt]." },
+    { mesh: 2, name: "Doogu (The Blob)", details: "Original-Schism. Pitch Ana-3. Net-Span 2::1 Cyclic Chronodemon of Splitting-Waters. Ciphers Gt-21. Shadows Surge-Current. 2nd Phase-limit. Decadology. C/tp-#1 Mn+ [1H]. Rt-1:[1872] Mn. Primordial breath (pneumatic practices). Rt-2:[271] Ambivalent capture, hooks (live-bait, traps, plot-twists) Rt-3:[27541] Mj. Slow pull to stasis, protection from drowning. [+1 sub-Rt]." },
+    { mesh: 3, name: "Ixix (Yix)", details: "Abductor. (Clicks Gt-03). Pitch Ana-3 Net-Span 3::0 Chaotic Xenodemon of Cosmic Indifference. Ciphers Gt-03. 3rd Door (The Swirl), [Earth]. Cranial. Rt-0:[?]. Occult terrestrial history (Who does the Earth think It Is?)" },
+    { mesh: 4, name: "Ixigool (Djinn of the Magi)", details: "Over-Ghoul. Pitch Ana-4. Net Span 3::1 Amphidemon of Tridentity (Sphinx-time). Decadology. C/tp-#4, Mn+ [4H]. Rt-1:[18723]. Unimpeded ascent (prophecy). Rt-2:[1872563]. Ultimate implications, (as above so below). [+1 sub-Rt]." },
+    { mesh: 5, name: "Ixidod (King Sid)", details: "The Zombie-Maker. Pitch Ana-5. Net Span 3::2 Amphidemon of Escape-velocity. Haunts Gt-03. 3rd Phase-limit. Decadology. C/tp-#5, Mn+ [5H]. Rt-1:[23] Crises through excess (micropause abuse) Rt-2:[27563] Illusion of progress (out of the frying-pan into the fire). [+1 sub-Rt]." },
+    { mesh: 6, name: "Krako (Kru, Karak-oa)", details: "The Croaking Curse. Pitch Ana-4 Net-Span 4::0 Amphidemon of Burning-Hail 4th Door (Delta) Mars. Cervical Decadology. C/tp-#9, Mj+ [9C]. Rt-1:[41890] Subsidence, heaviness of fatality. [+1 sub-Rt]." },
+    { mesh: 7, name: "Sukugool (Old Skug)", details: "The Sucking-Ghoul. Pitch Ana-5. Net-Span 4::1 Cyclic Chronodemon of deluge and implosion. Prowls Sink-Current. Haunts Gt-10 Decadology. C/tp-#3, Mj+ [3C]. Rt-1:[187254] Mn. Cycle of creation and destruction. Rt-2:[41] Mj. Submersion (gravedigging). [+1 sub-Rt]." },
+    { mesh: 8, name: "Skoodu (Li'l Scud)", details: "The Fashioner. Pitch Ana-6 Net-Span 4::2 Cyclic Chronodemon of Switch-Crazes. Shadows Hold-Current Decadology. C/tp-#2, Mn+ [2H]. Rt-1:[2754] Mn. Historical time (eschatology). Rt-2:[41872] Passage through the deep. Rt-3:[451872] Mj. Cyclic reconstitution and stability." },
+    { mesh: 9, name: "Skarkix (Sharky, Scar-head)", details: "Buzz-Cutter. Pitch Ana-7 (Uppermost). Net-Span 4::3 Amphidemon of anti-evolution (eddies of the Delta). 4th Phase-limit. Decadology. C/tp-#6, Mj+ [6C]. Rt-1:[418723] Hermetic abbreviations (history of the magicians). Rt-2:[4518723] Sacred seal of time (triadic reconfirmation of the cycle). Rt-3:[4563] Apocalyptic rapture (jagged turbulence). [+1 sub-Rt]." },
+    { mesh: 10, name: "Tokhatto (Old Toker, Top Cat)", details: "Decimal Camouflage. Pitch Cth-4 Net-Span 5::0 Amphidemon of Talismania. 5th Door (Hyperborea) [Jupiter], Cervical. Decadology. C/tp-#9, Mj- [9S]. Angel of the Cards. Rt-1:[541890] Number as destiny (digital convergence). [+1 sub-Rt]." },
+    { mesh: 11, name: "Tukkamu", details: "Occulturation. Pitch Cth-3. Net-Span 5::1 Cyclic Chronodemon of Pathogenesis. Ciphers Gt-15. Prowls Sink-Current Decadology. C/tp-#3, Mj- [3S]. Rt-1:[18725] Mn. Optimal maturation (medicine as diffuse healing). Rt-2:[541] Mj. Rapid deterioration (putrefaction, catabolism). [+1 sub-Rt]." },
+    { mesh: 12, name: "Kuttadid (Kitty)", details: "Ticking Machines. Pitch Cth-2 Net-Span 5::2 Cyclic Chronodemon of Precarious States. Prowls Hold-Current Decadology. C/tp-#2, Mn- [2D]. Rt-1:[275] Mn. Maintaining balance (calendric conservatism). Rt-2:[541872] Mj. Exhaustive vigilance. [+1 sub-Rt]." },
+    { mesh: 13, name: "Tikkitix (Tickler)", details: "Clicking Menaces. Pitch Cth-1 Net-Span 5::3 Amphidemon of Vortical Delirium Decadology. C/tp-#6, Mj- [6S]. Rt-1:[5418723] Swirl-patterns (tornadoes, wind-voices). [+1 sub-Rt]. Rt-2:[563] Mysterious disappearances (things carried-away). [+1 sub-Rt]." },
+    { mesh: 14, name: "Katak", details: "Desolator. Pitch Null. Net-Span 5::4 Syzygetic Chronodemon of Cataclysmic Convergence. Feeds Sink-Current. Ciphers Gt-45 5th Phase limit Decadology. C/tp-#0 [Joker]. Rt-0:[X] Tail-chasing, rabid animals (nature red in tooth and claw). Rt-1:[418725] Panic (slasher pulp and religious fervour)." },
+    { mesh: 15, name: "Tchu (Tchanul)", details: "Source of Subnothingness. Pitch Cth-3 Net-Span 6::0 Chaotic Xenodemon of Ultimate Outsideness (and unnamable things). 6th Door (Undu) [Saturn].Cranial Rt-0:[?] Cosmic deletions and real impossibilities." },
+    { mesh: 16, name: "Djungo", details: "Infiltrator. Pitch Cth-2 Net Span 6::1 Amphidemon of Subtle Involvements (and intricate puzzles). Decadology. C/tp-#4, Mn- [4D]. Rt-1:[187236] Turbular fluids (maelstroms, chaotic incalculability). [+1 sub-Rt]. Rt-2:[187256] Surreptitious invasions, inexplicable contaminations (fish falls)." },
+    { mesh: 17, name: "Djuddha (Judd Dread)", details: "Decentred Threat. Pitch Cth-2 Net-Span 6::2 Amphidemon of Artificial Turbulence (complex-dynamics simulations) Decadology. C/tp-#5, Mn- [5D]. Rt-1:[236] Machine-vortex (seething skin). [+1 sub-Rt]. Rt-2:[256] Storm peripheries (Wendigo legends)." },
+    { mesh: 18, name: "Djynxx (Ching, The Jinn)", details: "Child Stealer. Pitch Null Net-Span 6::3 Syzygetic Xenodemon of Time-Lapse. Feeds and Prowls Warp-Current. Ciphers Gt-36. Haunts Gt-06, Gt-21. Rt-0:[X] Abstract cyclones, dust spirals (nomad war-machine). [+2 sub-Rt]." },
+    { mesh: 19, name: "Tchakki (Chuckles)", details: "Bag of Tricks. Pitch Ana-1. Net-Span 6::4 Amphidemon of Combustion. Decadology. C/tp-#6, Mn+ [6H]. 1st Decademon. Rt-1:[4187236] Quenching accidents (apprentice smiths). [+1 sub-Rt]. Rt-2:[45187236] Mappings between incompatible time-systems (Herakleitean fire-cycle). [+1 sub-Rt]. Rt-3:[456] Conflagrations (shrieking deliria, spontaneous combustion)." },
+    { mesh: 20, name: "Tchattuk (One Eyed Jack, Djatka)", details: "Pseudo-Basis. Pitch Cth-7 (Lowermost). Net-Span 6::5 Amphidemon of Unscreened Matrix. Haunts Gt-15. 6th Phase-limit. Decadology. C/tp-#6, Mn- [6D]. Rt-1:[54187236] Zero-gravity. [+2 sub-Rt]. Rt-2:[56] Cut-outs (UFO cover-ups, Nephilim)." },
+    { mesh: 21, name: "Puppo (The Pup)", details: "Break-Outs. Pitch Cth-2. Net-Span 7::0 Amphidemon of Larval Regression. 7th Door (Akasha) [Uranus], Cervical Decadology. C/tp-#8, Mj- [8S]. Rt-1:[71890] Dissolving into slime (masked horrors). Rt-2:[72541890] Chthonic swallowings. [+1 sub-Rt]." },
+    { mesh: 22, name: "Bubbamu (Bubs)", details: "After Babylon. Pitch Cth-1. Net-Span 7::1 Cyclic Chronodemon of Relapse. Prowls Surge-Current. Haunts Gt-28. Decadology. C/tp-#1, Mn- [1D]. Rt-1:[187] Mn. Hypersea (marine life on land). Rt-2:[71] Aquassassins (Black-Atlantis). Rt-3:[72541] Mj. Seawalls (dry-time, taboo on menstruation)." },
+    { mesh: 23, name: "Oddubb (Odba)", details: "Broken Mirror. Pitch Null Net-Span 7::2 Syzygetic Chronodemon of Swamp-Labyrinths (and blind-doubles). Feeds Hold-Current. Rt-0:[X]. Time loops, glamour and glosses." },
+    { mesh: 24, name: "Pabbakis (Pabzix)", details: "Dabbler. Pitch Ana-1 Net-Span 7::3 Amphidemon of Interference (and fakery). Decadology. C/tp-#5, Mj+ [5C]. 2nd Decademon. Rt-1:[723] Batrachian mutations (and frog-plagues). Rt-2:[72563] Cans of worms (vermophobic hysteria, propagation by division). [+1 sub-Rt]." },
+    { mesh: 25, name: "Ababbatok (Abracadabra)", details: "Regenerator. Pitch Ana-2 Net-Span 7::4 Cyclic Chronodemon of Suspended Decay. Shadows Hold-Current Decadology. C/tp-#2, Mj+ [2C]. Rt-1:[4187] Frankensteinian experimentation (reanimations, golems). Rt-2:[45187] Mn. Purifications, amphibious cycles (and healing of wounds). Rt-3:[7254] Mj. Sustenance (smoke visions)." },
+    { mesh: 26, name: "Papatakoo (Pataku)", details: "Upholder. Pitch Cth-6 Net-Span 7::5 Cyclic Chronodemon of Calendric Time. Prowls Hold-Current Decadology. C/tp-#2, Mj- [2S]. Rt-1:[54187] Mn. Ultimate success (perseverance, blood sacrifice). [+1 sub-Rt]. Rt-2:[725] Mj. Rituals becoming nature." },
+    { mesh: 27, name: "Bobobja (Bubbles, Beelzebub (Lord of the Flies))", details: "Heavy Atmosphere Pitch Cth-5 Net-Span 7::6 Amphidemon of Teeming Pestilence. 7th Phase-limit Decadology. C/tp-#5, Mj- [5S]. Rt-1:[7236] Strange lights in the swamp (dragonflies, ET frog-cults). [+1 sub-Rt]. Rt-2:[7256] Swarmachines (lost harvests)." },
+    { mesh: 28, name: "Minommo", details: "Webmaker. Pitch Cth-1 Net-Span 8::0 Amphidemon of Submergance. 8th Door (Limbo) [Neptune] Lumbar Decadology. C/tp-#7, Mj- [7S]. Rt-1:[890] Shamanic voyage (dream sorcery and mitochondrial chatter)." },
+    { mesh: 29, name: "Mur Mur (Murrumur, Mu(mu))", details: "Dream-Serpent. Pitch Null Net-Span 8::1 Syzygetic Chronodemon of the Deep Ones. Feeds Surge-Current. Rt-0:[X] Oceanic sensation (gilled-unlife and spinal-regressions)." },
+    { mesh: 30, name: "Nammamad", details: "Mirroracle. Pitch Ana-1 Net-Span 8::2 Cyclic Chronodemon of Subterranean Commerce. Shadows Surge-Current.Ciphers Gt-28 Decadology. C/tp-#1, Mj+ [1C]. 3rd Decademon Rt-1:[2718] Voodoo in cyberspace (cthulhoid traffic). Rt-2:[275418] Mn. Completion as final collapse (heat-death, degenerative psychoses). [+1 sub-Rt]. Rt-3:[8172] Mj. Emergences (and things washed-up on beaches)." },
+    { mesh: 31, name: "Mummumix (Mix-Up)", details: "The Mist-Crawler. Pitch Ana-2. Net-Span 8::3 Amphidemon of Insidious Fog (Nyarlathotep) Decadology. C/tp-#4, Mj+ [4C]. Rt-1:[81723] Ocean storms (and xenocommunication on the bacterial plane). Rt-2:[8172563] Diseases from outer-space (oankali medicine). [+1 sub-Rt]." },
+    { mesh: 32, name: "Numko (Old Nuk)", details: "Keeper of Old Terrors. Pitch Ana-3. Net-Span 8::4 Cyclic Chronodemon of Autochthony. Prowls Sink-Current Decadology. C/tp-#3, Mn+ [3H]. Rt-1:[418] Necrospeleology (abysmal patience rewarded). Rt-2:[4518] Mn. Subduction (and carnivorous fish). Rt-3:[817254] Mj. Vulcanism (and bacterial intelligence)." },
+    { mesh: 33, name: "Muntuk (Manta, Manitou)", details: "Desert Swimmer. Pitch Cth-5 Net-Span 8::5 Cyclic Chronodemon of Arid Seabeds. Shadows Sink-Current. Decadology. C/tp-#3, Mn- [3D]. Rt-1:[5418] Mn. Ancient rivers. [+1 sub-Rt]. Rt-2:[81725] Mj. Cloud-vaults and oppressive tension (protection during monsoon)" },
+    { mesh: 34, name: "Mommoljo (Mama Jo)", details: "Alien Mother. Pitch Cth-4. Net-Span 8::6 Amphidemon of Xenogenesis Decadology. C/tp-#4, Mj- [4S]. Rt-1:[817236] Cosmobacterial exogermination. [+1 sub-Rt]. Rt-2:[817256] Extraterrestrial residues (including alien DNA segments)." },
+    { mesh: 35, name: "Mombbo (Fishy-princess)", details: "Tentacle Face. Pitch Cth-3 Net-Span 8::7 Cyclic Chronodemon of Hybridity. Prowls Surge-Current 8th Phase-limit. Decadology. C/tp-#1, Mj- [1S]. Rt-1:[718] Ophidian transmutation (palaeopythons). Rt-2:[725418] Mn. Surreptitious colonization [+1 sub-Rt]. Rt-3:[817] Mj. Surface-amnesia (old fishwives tales)." },
+    { mesh: 36, name: "Uttunul", details: "Seething Void (clicks Gt-36) Pitch Null Net-Span 9::0 Syzygetic Xenodemon of Atonality. Feeds and Prowls Plex-Current, Haunts Gt-45 9th Door (Cthelll) [Pluto], Sacrum Rt-0:[X] Crossing the iron-ocean (plutonics)" },
+    { mesh: 37, name: "Tutagool (Yettuk)", details: "The Tattered Ghoul. Pitch Ana-1. Net-Span 9::1 Amphidemon of Punctuality. Decadology. C/tp-#7, Mn+ [7H]. 4th Decademon Rt-1:[189] The dark arts, rusting iron, tattooing (one-way ticket to Hell)." },
+    { mesh: 38, name: "Unnunddo (The False Nun)", details: "Double-Undoing. Pitch Ana-2. Net-Span 9::2 Amphidemon of Endless Uncasing (onion-skin horror) Decadology. C/tp-#8, Mn+ [8H]. Rt-1:[27189] Crypt-traffic (and centipede simulations). Rt-2:[2754189] Communication-grids (telecom webs, shamanic metallism).[+1 sub-Rt]." },
+    { mesh: 39, name: "Ununuttix (Tick-Tock)", details: "Particle Clocks. Pitch Ana-3 Net-Span 9::3 Chaotic Xenodemon of Absolute Coincidence Rt-0:[?] Numerical connection through the absence of any link" },
+    { mesh: 40, name: "Ununak (Nuke)", details: "Blind Catastrophe. Pitch Ana-4. Net-Span 9::4 Amphidemon of Convulsions. Decadology. C/tp-#9, Mn+ [9H]. Rt-1:[4189] Secrets of the blacksmiths. Rt-2:[45189] Subterranean impulses." },
+    { mesh: 41, name: "Tukutu (Killer-Kate)", details: "Cosmotraumatics. Pitch Cth-4 Net Span 9::5 Amphidemon of Death-Strokes. Decadology. C/tp-#9, Mn- [9D]. Rt-1:[54189] Crash-signals (barkerian scarring). [+1 sub-Rt]." },
+    { mesh: 42, name: "Unnutchi (Outch, T'ai Chi)", details: "Tachyonic immobility (slow vortex). Pitch Cth-3. Net-Span 9::6 Chaotic Xenodemon of Coiling Outsideness. Rt-0:[?] Asymmetric zygopoise (and cybernetic anomalies)." },
+    { mesh: 43, name: "Nuttubab (Nut-Cracker)", details: "Mimetic Anorganism. Pitch Cth-2 Net-Span 9::7 Amphidemon of Metaloid Unlife. Decadology. C/tp-#8, Mn- [8D]. Rt-1:[7189] Lunacies (iron in the blood). Rt-2:[7254189] Dragon-lines (terrestrial electromagnetism). [+1 sub-Rt]." },
+    { mesh: 44, name: "Ummnu (Om, Omni, Amen, Omen)", details: "Ultimate Inconsequence. Pitch Cth-1 Net-Span 9::8 Amphidemon of Earth-Screams. Haunts Gt-36 9th Phase-limit Decadology. C/tp-#7, Mn- [7D]. Rt-0:[89] Crust-friction (anorganic tension)." },
+  ];
 
   const initializeDeck = () => {
     const newDeck = [];
@@ -62,6 +112,7 @@ const Subdecadence = () => {
     setScoreBreakdown(null);
     setAeonTotal(0);
     setGameState("idle");
+    setSummonedLemur(null);
     setMessage("Draw cards to begin the aeon");
   };
 
@@ -309,26 +360,31 @@ const Subdecadence = () => {
     setCurrentScore(score);
     setAeonTotal(aeonTotal + score);
 
+    const finalScore = aeonTotal + score;
+    const lemurMesh = Math.abs(finalScore);
+    const lemur = lemurs.find((l) => l.mesh === lemurMesh);
+
     // Set game state and message
-    if (score < 0) {
+    if (score < 0 || deck.length < 10) {
+      setSummonedLemur(lemur);
+      setGameHistory((prevHistory) => [
+        ...prevHistory,
+        { finalScore, lemurMesh },
+      ]);
       setGameState("ended");
       setMessage(
-        `Game ended. Final score: ${
-          aeonTotal + score
-        }. Call the lemur at mesh ${Math.abs(aeonTotal + score)}`
-      );
-    } else if (deck.length < 10) {
-      setGameState("ended");
-      setMessage(
-        `Deck out! Final score: ${
-          aeonTotal + score
-        }. Call the lemur at mesh ${Math.abs(aeonTotal + score)}`
+        score < 0
+          ? `Game ended. Final score: ${finalScore}. Call the lemur at mesh ${lemurMesh}`
+          : `Deck out! Final score: ${finalScore}. Call the lemur at mesh ${lemurMesh}`
       );
     } else {
       setGameState("idle");
       setMessage(`Score: +${score}. Draw again to continue.`);
     }
   };
+
+
+
 
   useEffect(() => {
     startNewGame();
@@ -552,7 +608,31 @@ const Subdecadence = () => {
             </div>
           )}
 
-          {scoreBreakdown && (
+          {gameState === "ended" && summonedLemur && (
+            <div className="mt-3 bg-black bg-opacity-50 rounded-lg p-4">
+              <h2 className="text-2xl font-bold text-yellow-400 mb-2 text-center">
+                Lemur Summoned
+              </h2>
+              <h3 className="text-lg font-semibold text-yellow-300 mb-2">Mesh-{summonedLemur.mesh}: {summonedLemur.name}</h3>
+              <p className="text-gray-300">{summonedLemur.details}</p>
+
+              {gameHistory.length > 0 && (
+                <div className="mt-4 border-t border-gray-700 pt-4">
+                  <h3 className="text-lg font-semibold text-yellow-300 mb-2">Game History</h3>
+                  <ul className="space-y-1 text-sm text-gray-400">
+                    {gameHistory.map((game, index) => (
+                      <li key={index} className="flex justify-between">
+                        <span>Game {index + 1}:</span>
+                        <span>Score {game.finalScore}, Lemur Mesh-{game.lemurMesh}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+            </div>
+          )}
+          {gameState !== "ended" && scoreBreakdown && (
             <div className="mt-3 bg-black bg-opacity-50 rounded-lg p-4">
               <h2 className="text-2xl font-bold mb-4 text-center">
                 Score Calculation
@@ -769,7 +849,13 @@ const Subdecadence = () => {
         </main>
 
         {/* Right column: Controls */}
-        <aside className="w-full md:w-56 bg-transparent p-4 flex-shrink-0 h-screen">
+        <aside
+          className={`w-full md:w-56 bg-transparent p-4 flex-shrink-0 h-screen transition-opacity duration-1000 ${
+            gameState === "ended"
+              ? "z-60 opacity-100"
+              : "opacity-100"
+          }`}
+        >
           <div className="h-full flex flex-col justify-center">
             <div className="flex flex-col gap-4">
               <button

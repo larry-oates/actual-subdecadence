@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Shuffle, Play, RotateCcw, Eye } from "lucide-react";
 
 const Subdecadence = () => {
-  const [gameMode, setGameMode] = useState("subdecadence");
+  const [gameMode, setGameMode] = useState("actual-subdecadence");
   const [deck, setDeck] = useState([]);
   const [crossCards, setCrossCards] = useState([]);
   const [setCards, setSetCards] = useState([]);
@@ -74,22 +74,39 @@ const Subdecadence = () => {
 
   const initializeDeck = () => {
     const newDeck = [];
-    suits.forEach((suit) => {
-      const startValue = gameMode === "decadence" ? 1 : 0;
-      for (let i = startValue; i <= 9; i++) {
-        if (i === 0 && gameMode === "subdecadence") {
-          newDeck.push({ suit, value: 0, display: "Q", id: `${suit}-0` });
-        }
-        if (i > 0) {
+
+    if (gameMode === "actual-subdecadence") {
+      // Generate 45 cards for Actual-Subdecadence
+      for (let x = 1; x <= 9; x++) {
+        for (let y = 0; y < x; y++) {
+          const phaseNumber = x; // Highest number is the phase number
+          const operationalNumber = 9 - phaseNumber; // 9 - phase number
+          const netspan = `${x}::${y}`; // Combination string as suit
+
           newDeck.push({
-            suit,
-            value: i,
-            display: i.toString(),
-            id: `${suit}-${i}`,
+            suit: netspan,
+            value: operationalNumber,
+            display: operationalNumber.toString(),
+            id: netspan,
           });
         }
       }
-    });
+    } else {
+      // Original Subdecadence/Decadence deck generation
+      suits.forEach((suit) => {
+        const startValue = gameMode === "decadence" ? 1 : 0;
+        for (let i = startValue; i <= 9; i++) {
+          if (i === 0 && gameMode === "subdecadence") {
+            newDeck.push({ suit, value: 0, display: "Q", id: `${suit}-0` });
+          }
+          if (i > 0) {
+            newDeck.push({
+              suit, value: i, display: i.toString(), id: `${suit}-${i}`,
+            });
+          }
+        }
+      });
+    }
     // newDeck.push({ suit: '🃏', value: 'K', display: 'Joker', id: 'joker' });
     return shuffleDeck(newDeck);
   };
@@ -155,7 +172,7 @@ const Subdecadence = () => {
 
   const canPair = (card1, card2) => {
     if (card1.value === "K" || card2.value === "K") return false;
-    const target = gameMode === "decadence" ? 10 : 9;
+    const target = gameMode === "decadence" ? 10 : 9; // Decadence targets 10, others target 9
     return card1.value + card2.value === target;
   };
 
@@ -480,7 +497,8 @@ const Subdecadence = () => {
                   : "bg-white"
               }
               ${
-                card.suit === "♥" || card.suit === "♦"
+                gameMode === "subdecadence" &&
+                (card.suit === "♥" || card.suit === "♦")
                   ? "text-red-600"
                   : "text-black"
               }
@@ -490,18 +508,18 @@ const Subdecadence = () => {
           >
             <div className="absolute top-1 left-1 w-4 text-xs font-bold flex flex-col items-center">
               <span>{card.display}</span>
-              <span>{card.suit}</span>
+              <span className="text-[0.6rem]">{card.suit}</span> {/* Smaller font for netspan */}
             </div>
             <div className="flex flex-col items-center">
               <div className="text-4xl font-bold">{card.display}</div>
             </div>
             <div className="absolute bottom-1 right-1 w-4 text-xs font-bold flex flex-col items-center rotate-180">
               <span>{card.display}</span>
-              <span>{card.suit}</span>
+              <span className="text-[0.6rem]">{card.suit}</span> {/* Smaller font for netspan */}
             </div>
 
             {position && (
-              <div className="absolute -top-6 text-xs font-semibold text-gray-600 whitespace-nowrap">
+              <div className="absolute -top-6 text-xs font-semibold text-black whitespace-nowrap">
                 {position}
               </div>
             )}
@@ -756,8 +774,11 @@ const Subdecadence = () => {
               <h1 className="text-4xl font-bold mb-2 capitalize">{gameMode}</h1>
               <p className="text-center text-gray-300 mb-2">
                 {gameMode === "decadence"
-                  ? "UNO™ is the perfect time Time Sorcery tool..."
-                  : "the ultimate blasphemy"}
+                  ? "UNO™ is the perfect time Time Sorcery tool..." // Decadence description
+                  : gameMode === "actual-subdecadence"
+                  ? "The ultimater blasphemy; xeno sorcerers' delight"
+                  : "The Ultimate Blasphemy"}
+
               </p>
 
               <div className="bg-black bg-opacity-50 rounded-lg p-2">
@@ -927,6 +948,7 @@ const Subdecadence = () => {
                 >
                   <option value="subdecadence">Subdecadence</option>
                   <option value="decadence">Decadence</option>
+                  <option value="actual-subdecadence">Actual-Subdecadence</option>
                 </select>
               </div>
               <button

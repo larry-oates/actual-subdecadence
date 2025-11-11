@@ -519,7 +519,7 @@ const Subdecadence = () => {
             </div>
 
             {position && (
-              <div className="absolute -top-6 text-xs font-semibold text-black whitespace-nowrap">
+              <div className="absolute -top-6 text-xs font-semibold text-gray-600 whitespace-nowrap">
                 {position}
               </div>
             )}
@@ -597,6 +597,8 @@ const Subdecadence = () => {
 
   const hasDrawnCards = crossCards.length > 0;
 
+  const targetNumber = gameMode === "decadence" ? 10 : 9;
+
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white">
       {draggedCard && isDragging && (
@@ -625,9 +627,9 @@ const Subdecadence = () => {
           {gameState === "playing" && (
             <div className="mt-3 bg-black bg-opacity-50 rounded-lg p-4 mb-4">
               <h2 className="text-lg font-semibold mb-2">How to Play</h2>
-              <p className="text-sm text-gray-301">
-                Select a flipped set card and drop it on a cross card, or use
-                Calculate to auto-match.
+              <p className="text-sm text-gray-300">
+                Pair cards that sum to {targetNumber}. Select a flipped set card
+                and drop it on a cross card, or use Calculate to auto-match.
               </p>
             </div>
           )}
@@ -756,6 +758,8 @@ const Subdecadence = () => {
                     className={
                       scoreBreakdown.total >= -1
                         ? "text-green-400"
+                        : scoreBreakdown.total === 0
+                        ? "text-gray-400"
                         : "text-red-400"
                     }
                   >
@@ -778,7 +782,6 @@ const Subdecadence = () => {
                   : gameMode === "actual-subdecadence"
                   ? "The ultimater blasphemy; xeno sorcerers' delight"
                   : "The Ultimate Blasphemy"}
-
               </p>
 
               <div className="bg-black bg-opacity-50 rounded-lg p-2">
@@ -927,7 +930,7 @@ const Subdecadence = () => {
 
         {/* Right column: Controls */}
         <aside
-          className={`w-full md:w-56 bg-transparent p-4 flex-shrink-0 h-screen transition-opacity duration-1000 ${
+          className={`w-full md:w-56 bg-transparent py-4 pr-4 flex-shrink-0 h-screen transition-opacity duration-1000 ${
             gameState === "ended" ? "z-60 opacity-100" : "opacity-100"
           }`}
         >
@@ -948,7 +951,9 @@ const Subdecadence = () => {
                 >
                   <option value="subdecadence">Subdecadence</option>
                   <option value="decadence">Decadence</option>
-                  <option value="actual-subdecadence">Actual-Subdecadence</option>
+                  <option value="actual-subdecadence">
+                    Actual-Subdecadence
+                  </option>
                 </select>
               </div>
               <button

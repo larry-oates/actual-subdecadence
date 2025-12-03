@@ -580,7 +580,7 @@ const Subdecadence = () => {
             isBottom={true}
           />
           {pairedSetCard && (
-            <div className="absolute top-1 left-5" style={{ zIndex: 2 }}>
+            <div className="absolute top-1 left-6" style={{ zIndex: 2 }}>
               <Card
                 card={pairedSetCard}
                 isPaired={true}
